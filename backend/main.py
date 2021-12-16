@@ -12,6 +12,13 @@ import statistics
 
 input_file = 'image/goodBarber.png'
 
+"""
+if len(sys.argv) != 3:
+    print("%s input_file output_file" % (sys.argv[0]))
+    sys.exit()
+else:
+    input_file = sys.argv[1]
+    output_file = sys.argv[2]"""
 
 if not os.path.isfile(input_file):
     print("No such file '%s'" % input_file)
@@ -313,7 +320,7 @@ for i, e in enumerate(img_decmoposee):
     tabStat.append(pourcentage_de_contrast(e))
     cv2.imshow(str(i), e)
 
-tabStat.insert(0,round(statistics.mean(tabStat), 2))
+tabStat.insert(0, round(statistics.mean(tabStat), 2))
 
 
 
@@ -323,14 +330,12 @@ for e in tabStat:
 
 cv2.waitKey(0)
 
-def getFinalResult():
-    return tabStat
-
 
 if DEBUG:
     cv2.imwrite('edges.png', edges)
     cv2.imwrite('processed.png', processed)
     cv2.imwrite('rejected.png', rejected)
+
 
 
 
