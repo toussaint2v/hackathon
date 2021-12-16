@@ -11,172 +11,174 @@ import statistics
 
 
 input_file = 'image/goodBarber.png'
-def finalAnalyse(input_file):
 
 
-    """
-    if len(sys.argv) != 3:
-        print("%s input_file output_file" % (sys.argv[0]))
-        sys.exit()
+
+"""
+if len(sys.argv) != 3:
+    print("%s input_file output_file" % (sys.argv[0]))
+    sys.exit()
+else:
+    input_file = sys.argv[1]
+    output_file = sys.argv[2]"""
+
+
+
+
+# Determine pixel intensity
+# Apparently human eyes register colors differently.
+# TVs use this formula to determine
+# pixel intensity = 0.30R + 0.59G + 0.11B
+def ii(xx, yy):
+
+    if yy >= img_y or xx >= img_x:
+        # print "pixel out of bounds ("+str(y)+","+str(x)+")"
+        return 0
+    pixel = img[ yy ][ xx ]
+    return 0.30 * pixel[ 2 ] + 0.59 * pixel[ 1 ] + 0.11 * pixel[ 0 ]
+
+
+# A quick test to check whether the contour is
+# a connected shape
+def connected(contour):
+    first = contour[ 0 ][ 0 ]
+    last = contour[ len(contour) - 1 ][ 0 ]
+    return abs(first[ 0 ] - last[ 0 ]) <= 1 and abs(first[ 1 ] - last[ 1 ]) <= 1
+
+
+# Helper function to return a given contour
+def c(index):
+
+    return contours[ index ]
+
+
+# Count the number of real children
+def count_children(index, h_, contour):
+    # No children
+    if h_[ index ][ 2 ] < 0:
+        return 0
     else:
-        input_file = sys.argv[1]
-        output_file = sys.argv[2]"""
+        # If the first child is a contour we care about
+        # then count it, otherwise don't
+        if keep(c(h_[ index ][ 2 ])):
+            count = 1
+        else:
+            count = 0
 
+            # Also count all of the child's siblings and their children
+        count += count_siblings(h_[ index ][ 2 ], h_, contour, True)
+        return count
+
+
+# Quick check to test if the contour is a child
+def is_child(index, h_):
+    return get_parent(index, h_) > 0
+
+
+# Get the first parent of the contour that we care about
+def get_parent(index, h_):
+    parent = h_[ index ][ 3 ]
+    while not keep(c(parent)) and parent > 0:
+        parent = h_[ parent ][ 3 ]
+
+    return parent
+
+
+# Count the number of relevant siblings of a contour
+def count_siblings(index, h_, contour, inc_children=False):
+    # Include the children if necessary
+    if inc_children:
+        count = count_children(index, h_, contour)
+    else:
+        count = 0
+
+    # Look ahead
+    p_ = h_[index][0]
+    while p_ > 0:
+        if keep(c(p_)):
+            count += 1
+        if inc_children:
+            count += count_children(p_, h_, contour)
+        p_ = h_[ p_ ][ 0 ]
+
+    # Look behind
+    n = h_[ index ][ 1 ]
+    while n > 0:
+        if keep(c(n)):
+            count += 1
+        if inc_children:
+            count += count_children(n, h_, contour)
+        n = h_[ n ][ 1 ]
+    return count
+
+
+# Whether we care about this contour
+def keep(contour):
+    return keep_box(contour) and connected(contour)
+
+
+# Whether we should keep the containing box of this
+# contour based on it's shape
+def keep_box(contour):
+    xx, yy, w_, h_ = cv2.boundingRect(contour)
+
+    # width and height need to be floats
+    w_ *= 1.0
+    h_ *= 1.0
+
+    # Test it's shape - if it's too oblong or tall it's
+    # probably not a real character
+    if w_ / h_ < 0.1 or w_ / h_ > 10:
+        if DEBUG:
+            print("\t Rejected because of shape: (" + str(xx) + "," + str(yy) + "," + str(w_) + "," + str(h_) + ")" + \
+            str(w_ / h_))
+        return False
+
+    # check size of the box
+    if ((w_ * h_) > ((img_x * img_y) / 5)) or ((w_ * h_) < 15):
+        if DEBUG:
+            print("\t Rejected because of size")
+        return False
+    return True
+
+
+def include_box(index, h_, contour):
+    if DEBUG:
+        print(str(index) + ":")
+
+        if is_child(index, h_):
+            print("\tIs a child")
+            print("\tparent " + str(get_parent(index, h_)) + " has " +
+                  str(count_children(get_parent(index, h_), h_, contour)) + " children")
+
+            print( "\thas " + str(count_children(index, h_, contour)) + " children")
+
+
+    if is_child(index, h_) and count_children(get_parent(index, h_), h_, contour) <= 2:
+        if DEBUG:
+            print("\t skipping: is an interior to a letter")
+
+        return False
+
+    if count_children(index, h_, contour) > 2:
+        if DEBUG:
+            print("\t skipping, is a container of letters")
+
+        return False
+
+    if DEBUG:
+        print("\t keeping")
+
+    return True
+
+def main(input_file):
+    global img_y, img_x,contours, hierarchy, edges, DEBUG, img
     if not os.path.isfile(input_file):
         print("No such file '%s'" % input_file)
 
         sys.exit()
 
     DEBUG = 0
-
-
-    # Determine pixel intensity
-    # Apparently human eyes register colors differently.
-    # TVs use this formula to determine
-    # pixel intensity = 0.30R + 0.59G + 0.11B
-    def ii(xx, yy):
-
-        if yy >= img_y or xx >= img_x:
-            # print "pixel out of bounds ("+str(y)+","+str(x)+")"
-            return 0
-        pixel = img[ yy ][ xx ]
-        return 0.30 * pixel[ 2 ] + 0.59 * pixel[ 1 ] + 0.11 * pixel[ 0 ]
-
-
-    # A quick test to check whether the contour is
-    # a connected shape
-    def connected(contour):
-        first = contour[ 0 ][ 0 ]
-        last = contour[ len(contour) - 1 ][ 0 ]
-        return abs(first[ 0 ] - last[ 0 ]) <= 1 and abs(first[ 1 ] - last[ 1 ]) <= 1
-
-
-    # Helper function to return a given contour
-    def c(index):
-
-        return contours[ index ]
-
-
-    # Count the number of real children
-    def count_children(index, h_, contour):
-        # No children
-        if h_[ index ][ 2 ] < 0:
-            return 0
-        else:
-            # If the first child is a contour we care about
-            # then count it, otherwise don't
-            if keep(c(h_[ index ][ 2 ])):
-                count = 1
-            else:
-                count = 0
-
-                # Also count all of the child's siblings and their children
-            count += count_siblings(h_[ index ][ 2 ], h_, contour, True)
-            return count
-
-
-    # Quick check to test if the contour is a child
-    def is_child(index, h_):
-        return get_parent(index, h_) > 0
-
-
-    # Get the first parent of the contour that we care about
-    def get_parent(index, h_):
-        parent = h_[ index ][ 3 ]
-        while not keep(c(parent)) and parent > 0:
-            parent = h_[ parent ][ 3 ]
-
-        return parent
-
-
-    # Count the number of relevant siblings of a contour
-    def count_siblings(index, h_, contour, inc_children=False):
-        # Include the children if necessary
-        if inc_children:
-            count = count_children(index, h_, contour)
-        else:
-            count = 0
-
-        # Look ahead
-        p_ = h_[index][0]
-        while p_ > 0:
-            if keep(c(p_)):
-                count += 1
-            if inc_children:
-                count += count_children(p_, h_, contour)
-            p_ = h_[ p_ ][ 0 ]
-
-        # Look behind
-        n = h_[ index ][ 1 ]
-        while n > 0:
-            if keep(c(n)):
-                count += 1
-            if inc_children:
-                count += count_children(n, h_, contour)
-            n = h_[ n ][ 1 ]
-        return count
-
-
-    # Whether we care about this contour
-    def keep(contour):
-        return keep_box(contour) and connected(contour)
-
-
-    # Whether we should keep the containing box of this
-    # contour based on it's shape
-    def keep_box(contour):
-        xx, yy, w_, h_ = cv2.boundingRect(contour)
-
-        # width and height need to be floats
-        w_ *= 1.0
-        h_ *= 1.0
-
-        # Test it's shape - if it's too oblong or tall it's
-        # probably not a real character
-        if w_ / h_ < 0.1 or w_ / h_ > 10:
-            if DEBUG:
-                print("\t Rejected because of shape: (" + str(xx) + "," + str(yy) + "," + str(w_) + "," + str(h_) + ")" + \
-                str(w_ / h_))
-            return False
-
-        # check size of the box
-        if ((w_ * h_) > ((img_x * img_y) / 5)) or ((w_ * h_) < 15):
-            if DEBUG:
-                print("\t Rejected because of size")
-            return False
-        return True
-
-
-    def include_box(index, h_, contour):
-        if DEBUG:
-            print(str(index) + ":")
-
-            if is_child(index, h_):
-                print("\tIs a child")
-                print("\tparent " + str(get_parent(index, h_)) + " has " +
-                      str(count_children(get_parent(index, h_), h_, contour)) + " children")
-
-                print( "\thas " + str(count_children(index, h_, contour)) + " children")
-
-
-        if is_child(index, h_) and count_children(get_parent(index, h_), h_, contour) <= 2:
-            if DEBUG:
-                print("\t skipping: is an interior to a letter")
-
-            return False
-
-        if count_children(index, h_, contour) > 2:
-            if DEBUG:
-                print("\t skipping, is a container of letters")
-
-            return False
-
-        if DEBUG:
-            print("\t keeping")
-
-        return True
-
-
     # Load the image
     orig_img = cv2.imread(input_file)
 
@@ -323,10 +325,6 @@ def finalAnalyse(input_file):
 
     tabStat.insert(0, round(statistics.mean(tabStat), 2))
 
-    for e in tabStat:
-        print(e)
-
-
-
+    return tabStat
 
 
