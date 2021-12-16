@@ -10,7 +10,7 @@ from analyse_contrast import pourcentage_de_contrast
 import statistics
 
 
-input_file = 'image/goodbarber.png'
+input_file = 'image/goodBarber.png'
 
 
 if not os.path.isfile(input_file):
@@ -308,17 +308,20 @@ new_image = cv2.blur(new_image, (2, 2))
 img_decmoposee = decompose_img(new_image, cv2.imread(input_file))
 
 tabStat = []
-for e in img_decmoposee:
+for i, e in enumerate(img_decmoposee):
     tabStat.append(pourcentage_de_contrast(e))
+    cv2.imshow(str(i), e)
 
 
 
 for e in tabStat:
     print(e)
 
+
+
 print(round(statistics.mean(tabStat), 2))
 
-
+cv2.waitKey(0)
 
 if DEBUG:
     cv2.imwrite('edges.png', edges)

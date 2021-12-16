@@ -56,10 +56,7 @@ def decompose_img(img, imgOrigin):
         if (len(pytesseract.image_to_string(cropped)) > 4):
             i += 1
             croppedTab.append(cropped)
-            #cv2.imshow(str(i), cropped)
 
-
-    #cv2.waitKey(0)
     return croppedTab
 
 
