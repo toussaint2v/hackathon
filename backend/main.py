@@ -2,12 +2,15 @@ import cv2
 import numpy as np
 import sys
 import os.path
+
+import pytesseract
+
 from tesseract import decompose_img
 from analyse_contrast import pourcentage_de_contrast
 import statistics
 
 
-input_file = 'image/testblanc.png'
+input_file = 'image/goodbarber.png'
 
 
 if not os.path.isfile(input_file):
@@ -307,6 +310,11 @@ img_decmoposee = decompose_img(new_image, cv2.imread(input_file))
 tabStat = []
 for e in img_decmoposee:
     tabStat.append(pourcentage_de_contrast(e))
+
+
+
+for e in tabStat:
+    print(e)
 
 print(round(statistics.mean(tabStat), 2))
 

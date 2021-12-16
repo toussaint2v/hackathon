@@ -42,7 +42,9 @@ def decompose_img(img, imgOrigin):
     # to pytesseract for extracting text from it
     # Extracted text is then written into the text file
     croppedTab = []
+    i =0
     for cnt in contours:
+
         x, y, w, h = cv2.boundingRect(cnt)
 
         # Drawing a rectangle on copied image
@@ -50,15 +52,16 @@ def decompose_img(img, imgOrigin):
 
         # Cropping the text block for giving input to OCR
         cropped = imgOrigin[ y:y + h, x:x + w ]
-        croppedTab.append(cropped)
+
+        if (len(pytesseract.image_to_string(cropped)) > 4):
+            i += 1
+            croppedTab.append(cropped)
+            #cv2.imshow(str(i), cropped)
 
 
-
-
-
-
-
+    #cv2.waitKey(0)
     return croppedTab
+
 
     """ print(len(croppedTab))
     i = 0
