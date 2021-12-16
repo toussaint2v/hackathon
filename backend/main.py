@@ -170,7 +170,7 @@ def include_box(index, h_, contour):
 
     return True
 
-def finalAnalyse(input_file):
+def main(input_file):
     global img_y, img_x,contours, hierarchy, edges, DEBUG, img
     if not os.path.isfile(input_file):
         print("No such file '%s'" % input_file)
@@ -324,16 +324,10 @@ def finalAnalyse(input_file):
 
     tabStat.insert(0, round(statistics.mean(tabStat), 2))
 
-    return tabStat, img_decmoposee
-
-def getStat(image):
-    return finalAnalyse(image)[0]
-
-def getImages(image):
-    tabImages = finalAnalyse(image)[1]
-    tabUrl = []
+    tabImages = img_decmoposee
+    tabUrl = [ ]
     directory = "images_traitee"
-    tabImages.insert(0, cv2.imread(image))
+    tabImages.insert(0, img)
     if (os.path.exists(directory)):
         shutil.rmtree(directory)
     os.mkdir(directory)
@@ -342,8 +336,11 @@ def getImages(image):
     for i, e in enumerate(tabImages):
         cv2.imwrite("image_" + str(i) + ".png", e)
         tabUrl.append(directory + "/" + "image_" + str(i) + ".png")
+    res = []
+    for i in range(len(tabStat)):
+        res.append((tabStat[i], tabUrl[i]))
 
-    return tabUrl
+    return res
 
 
-print(getImages("image/goodBarber.png"))
+print(main("image/goodBarber.png"))
