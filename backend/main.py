@@ -3,9 +3,11 @@ import numpy as np
 import sys
 import os.path
 from tesseract import decompose_img
+from analyse_contrast import pourcentage_de_contrast
+import statistics
 
 
-input_file = 'image/image-blogue-1.png'
+input_file = 'image/testblanc.png'
 
 
 if not os.path.isfile(input_file):
@@ -300,7 +302,15 @@ for index_, (contour_, box) in enumerate(keepers):
 new_image = cv2.blur(new_image, (2, 2))
 
 # cv2.imwrite(output_file, new_image)
-decompose_img(new_image, cv2.imread(input_file))
+img_decmoposee = decompose_img(new_image, cv2.imread(input_file))
+
+tabStat = []
+for e in img_decmoposee:
+    tabStat.append(pourcentage_de_contrast(e))
+
+print(round(statistics.mean(tabStat), 2))
+
+
 
 if DEBUG:
     cv2.imwrite('edges.png', edges)

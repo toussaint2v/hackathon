@@ -35,10 +35,7 @@ def decompose_img(img, imgOrigin):
     # Creating a copy of image
     # imgOrigin = img.copy()
 
-    # A text file is created and flushed
-    file = open("recognized.txt", "w+")
-    file.write("")
-    file.close()
+
 
     # Looping through the identified contours
     # Then rectangular part is cropped and passed on
@@ -54,26 +51,20 @@ def decompose_img(img, imgOrigin):
         # Cropping the text block for giving input to OCR
         cropped = imgOrigin[ y:y + h, x:x + w ]
         croppedTab.append(cropped)
-        # Open the file in append mode
-        file = open("recognized.txt", "a")
-
-        # Apply OCR on the cropped image
-        imgToString = pytesseract.image_to_string(cropped)
-        text = imgToString
 
 
-        # Appending the text into file
-        file.write(text)
-        file.write("\n")
 
-        # Close the file
-        file.close
 
-    print(len(croppedTab))
+
+
+
+    return croppedTab
+
+    """ print(len(croppedTab))
     i = 0
     for e in croppedTab:
         i += 1
         cv2.imshow('test' + str(i), e)
 
-    cv2.waitKey()
+    cv2.waitKey() """
 
