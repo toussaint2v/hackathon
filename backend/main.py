@@ -308,9 +308,12 @@ new_image = cv2.blur(new_image, (2, 2))
 img_decmoposee = decompose_img(new_image, cv2.imread(input_file))
 
 tabStat = []
+
 for i, e in enumerate(img_decmoposee):
     tabStat.append(pourcentage_de_contrast(e))
     cv2.imshow(str(i), e)
+
+tabStat.insert(0,round(statistics.mean(tabStat), 2))
 
 
 
@@ -318,10 +321,11 @@ for e in tabStat:
     print(e)
 
 
-
-print(round(statistics.mean(tabStat), 2))
-
 cv2.waitKey(0)
+
+def getFinalResult():
+    return tabStat
+
 
 if DEBUG:
     cv2.imwrite('edges.png', edges)
