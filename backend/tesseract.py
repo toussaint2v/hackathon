@@ -60,11 +60,11 @@ def decompose_img(img, imgOrigin):
     return croppedTab
 
 
-    """ print(len(croppedTab))
-    i = 0
-    for e in croppedTab:
-        i += 1
-        cv2.imshow('test' + str(i), e)
+""" print(len(croppedTab))
+i = 0
+for e in croppedTab:
+    i += 1
+    cv2.imshow('test' + str(i), e)
 
-    cv2.waitKey() """
+cv2.waitKey() """
 

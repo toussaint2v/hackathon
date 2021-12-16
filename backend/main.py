@@ -1,16 +1,15 @@
+import shutil
+
 import cv2
 import numpy as np
 import sys
 import os.path
 
-import pytesseract
 
 from tesseract import decompose_img
 from analyse_contrast import pourcentage_de_contrast
 import statistics
 
-
-input_file = 'image/goodBarber.png'
 
 
 
@@ -171,7 +170,7 @@ def include_box(index, h_, contour):
 
     return True
 
-def main(input_file):
+def finalAnalyse(input_file):
     global img_y, img_x,contours, hierarchy, edges, DEBUG, img
     if not os.path.isfile(input_file):
         print("No such file '%s'" % input_file)
@@ -325,6 +324,26 @@ def main(input_file):
 
     tabStat.insert(0, round(statistics.mean(tabStat), 2))
 
-    return tabStat
+    return tabStat, img_decmoposee
+
+def getStat(image):
+    return finalAnalyse(image)[0]
+
+def getImages(image):
+    tabImages = finalAnalyse(image)[1]
+    tabUrl = []
+    directory = "images_traitee"
+    tabImages.insert(0, cv2.imread(image))
+    if (os.path.exists(directory)):
+        shutil.rmtree(directory)
+    os.mkdir(directory)
+    os.chdir(directory)
+
+    for i, e in enumerate(tabImages):
+        cv2.imwrite("image_" + str(i) + ".png", e)
+        tabUrl.append(directory + "/" + "image_" + str(i) + ".png")
+
+    return tabUrl
 
 
+print(getImages("image/goodBarber.png"))
