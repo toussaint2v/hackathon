@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>score</title>
+    <link
+            href="{{ url_for('static', filename='style/third.css') }}"
+            rel="stylesheet"
+    />
+</head>
+<body>
+    <h1>Here is your score !</h1>
+    <img src="{{ url_for('static', filename='image/second_space_bar.png')}}"/>
+    <div id="data_area">
+        {% for d in range(0, size) %}
+            <div class="container">
+                <img src="http://localhost:5000/score/images/?id=image_{{d}}" width="80px"/>
+                <div class="data">
+                    {{data[d][0]}}%
+                </div>
+                <div style="background-color:white; height:{{data[d][0]*10}}%;"></div>
+
+            </div>
+        {% endfor %}
+
+
+    </div>
+</body>
+</html>
