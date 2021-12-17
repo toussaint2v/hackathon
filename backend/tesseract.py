@@ -13,7 +13,7 @@ def decompose_img(img, imgOrigin):
 
     # Convert the image to gray scale
     gray = img
-    cv2.imshow('tzt',gray)
+
 
     # Performing OTSU threshold
     ret, thresh1 = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU | cv2.THRESH_BINARY_INV)
@@ -53,7 +53,7 @@ def decompose_img(img, imgOrigin):
         # Cropping the text block for giving input to OCR
         cropped = imgOrigin[ y:y + h, x:x + w ]
 
-        if (len(pytesseract.image_to_string(cropped)) > 4):
+        if (len(pytesseract.image_to_string(cropped)) > 0):
             i += 1
             croppedTab.append(cropped)
 

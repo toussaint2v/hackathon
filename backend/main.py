@@ -205,8 +205,8 @@ def main(input_file):
 
     # Find the contours
     contours, hierarchy = cv2.findContours(edges.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-
-    hierarchy = hierarchy[ 0 ]
+    if hierarchy:
+        hierarchy = hierarchy[ 0 ]
 
     if DEBUG:
         processed = edges.copy()
@@ -317,6 +317,8 @@ def main(input_file):
     # cv2.imwrite(output_file, new_image)
     img_decmoposee = decompose_img(new_image, cv2.imread(input_file))
 
+    if (len(img_decmoposee) < 1 ):
+        raise ValueError("Impossible d'analyser l'image")
     tabStat = []
 
     for i, e in enumerate(img_decmoposee):
@@ -342,5 +344,4 @@ def main(input_file):
 
     return res
 
-
-print(main("image/goodBarber.png"))
+print(main("image/test2.jpeg"))
